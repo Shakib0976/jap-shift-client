@@ -1,7 +1,8 @@
-import { useForm } from "react-hook-form"; 
-import Swal from 'sweetalert2'; 
-import UseAuth from "../../hooks/UseAuth"; 
-import { useLoaderData } from "react-router"; 
+import { useForm } from "react-hook-form";
+import Swal from 'sweetalert2';
+import UseAuth from "../../hooks/UseAuth";
+import { useLoaderData } from "react-router";
+import UseAxiosSecure from "../../hooks/UseAxiosSecure";
 
 // Helper function to generate a unique tracking ID
 const generateTrackingID = () => {
@@ -12,6 +13,17 @@ const generateTrackingID = () => {
 };
 
 const SendParcel = () => {
+
+
+    const axiosSecure = UseAxiosSecure();
+
+
+
+
+
+
+
+
     // Initialize react-hook-form
     const {
         register,         // Used to register input fields
@@ -115,6 +127,31 @@ const SendParcel = () => {
 
                 // You can send parcelData to backend or redirect to payment
                 console.log("Ready for payment:", parcelData);
+
+
+
+                // send data to the server
+
+                axiosSecure.post('/parcels', parcelData)
+                    .then(res => {
+                        console.log(res.data);
+
+                        if (res.data.insertedId) {
+                            // TODO: redirect to a payment page 
+                            Swal.fire({
+                                title: "Redirecting...",
+                                text: "Proceeding to payment gateway.",
+                                icon: "success",
+                                timer: 1500,
+                                showConfirmButton: false,
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    })
+
+
             }
         });
     };
@@ -190,7 +227,7 @@ const SendParcel = () => {
                         <h3 className="font-semibold text-xl">Sender Info</h3>
                         <div className="grid grid-cols-1 gap-4">
                             <input {...register("sender_name", { required: true })} className="input input-bordered w-full" placeholder="Name" />
-                            <input {...register("sender_contact", { required: true })} className="input input-bordered w-full" placeholder="Contact" />
+                            <input {...register("sender_contact", { required: true })} className="input input-bordered w-full" type="number" placeholder="Contact" />
                             <select {...register("sender_region", { required: true })} className="select select-bordered w-full">
                                 <option value="">Select Region</option>
                                 {uniqueRegions.map((region) => (
@@ -213,7 +250,7 @@ const SendParcel = () => {
                         <h3 className="font-semibold text-xl">Receiver Info</h3>
                         <div className="grid grid-cols-1 gap-4">
                             <input {...register("receiver_name", { required: true })} className="input input-bordered w-full" placeholder="Name" />
-                            <input {...register("receiver_contact", { required: true })} className="input input-bordered w-full" placeholder="Contact" />
+                            <input {...register("receiver_contact", { required: true })} className="input input-bordered w-full" type="number" placeholder="Contact" />
                             <select {...register("receiver_region", { required: true })} className="select select-bordered w-full">
                                 <option value="">Select Region</option>
                                 {uniqueRegions.map((region) => (
